@@ -1,0 +1,160 @@
+// This is your Prisma schema file, learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+model Game {
+  id Int @id @default(autoincrement())
+  title String
+  year Int
+  publisher Company @relation(name: "GamePublisher", fields: [publisherId], references: [id])
+  developer Company @relation(name: "GameDeveloper", fields: [developerId], references: [id])
+  publisherId Int
+  developerId Int
+  series Series @relation(fields: [seriesId], references: [id])
+  seriesId Int
+  genres GenresList[]
+  ratings UserRating[]
+}
+
+model Company {
+  id Int @id @default(autoincrement())
+  name String
+  publishedGames Game[] @relation(name: "GamePublisher")
+  developedGames Game[] @relation(name: "GameDeveloper")
+}
+
+model Series {
+  id Int @id @default(autoincrement())
+  title String
+  games Game[]
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts Post[]
+  roles UserRoles[]
+  ratings UserRating[]
+  reactions PostReaction[]
+}
+
+model Post {
+  id Int @id @default(autoincrement())
+  title String
+  body String
+  published Boolean
+  author User @relation(fields: [authorId], references: [id])
+  authorId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  destinationPost Post? @relation(name: "Comment", fields: [destinationPostId], references: [id])
+  destinationPostId Int
+  comments Post[] @relation(name: "Comment")
+  reactions PostReaction[]
+}
+
+
+model Role {
+  id Int @id @default(autoincrement())
+  name String
+  users UserRoles[]
+}
+
+model UserRoles {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  role Role @relation(fields: [roleId], references: [id])
+  roleId Int
+}
+
+model UserRating {
+  id Int @id @default(autoincrement())
+  game Game @relation(fields: [gameId], references: [id])
+  gameId Int
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  rating Int 
+}
+
+model PostReaction {
+  id Int @id @default(autoincrement())
+  post Post @relation(fields: [postId], references: [id])
+  postId Int
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  reaction PostReactionsList
+}
+
+
+enum GenresList {
+  Action 
+  Adventure
+  Battle
+  Board
+  Card
+  Casino
+  Compilation
+  Educational
+  Fighting
+  Flight
+  Hunting
+  Music
+  Pinball
+  Platformer
+  Party
+  Productivity
+  Puzzle
+  Racing
+  RPG
+  Shooter
+  Simulation
+  Sports
+  Strategy
+  Trivia
+  Wrestling
+  Other
+}
+
+enum UserRolesList {
+  Admin
+  Moderator
+  Editor
+  Contributor
+  Viewer
+}
+
+enum PostReactionsList {
+  Like
+  Dislike
+}
+
+
+
+// model Genre {
+//   id Int @id @default(autoincrement())
+//   name String
+//   games GameGenre[]
+// }
+
+// model GameGenre {
+//   id Int @id @default(autoincrement())
+//   game Game @relation(fields: [gameId], references: [id])
+//   gameId Int
+//   genre Genre @relation(fields: [genreId], references: [id])
+//   genreId Int
+// }
+
+
+
